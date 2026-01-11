@@ -104,15 +104,57 @@ jobs:
 
 ## Configuration
 
-Create a `.sentinel.yml` file in your repository root:
+Configuration is **optional**. Code Sentinel works out of the box with sensible defaults. The LLM provider is auto-detected from your action inputs (API keys).
+
+### Zero Config (Recommended Start)
+
+No `.sentinel.yml` needed! Just pass your API key and go:
 
 ```yaml
-# LLM Configuration
+- uses: sah1l/code-sentinel@v1
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+```
+
+**Default behavior:**
+- Reviews security, architecture, and bugs
+- Shows suggestions and above (no nitpicks)
+- Posts summary + up to 15 inline comments
+- Ignores lock files and common generated files
+
+### Custom Configuration
+
+Create a `.sentinel.yml` file to customize behavior. **All fields are optional**:
+
+```yaml
+# Only specify what you want to override
+
+# Custom team instructions (recommended!)
+instructions:
+  - "We use file-scoped namespaces in C#"
+  - "Always use async/await instead of .then()"
+
+# Ignore specific files or authors
+ignore:
+  paths:
+    - "**/*.test.ts"
+    - "docs/**"
+  authors:
+    - dependabot[bot]
+```
+
+### Full Configuration Reference
+
+All available options (all sections are optional):
+
+```yaml
+# LLM Configuration (optional - auto-detected from action inputs)
 llm:
   provider: openai  # openai | anthropic | gemini | ollama
-  model: gpt-4o
+  model: gpt-4o     # provider-specific model
 
-# Review Focus Areas
+# Review Focus Areas (optional)
 review:
   categories:
     - security
@@ -121,7 +163,7 @@ review:
     - bugs
   min_severity: suggestion  # critical | warning | suggestion | nitpick
 
-# Files to ignore
+# Files to ignore (optional)
 ignore:
   paths:
     - "**/*.test.ts"
@@ -130,21 +172,22 @@ ignore:
     - "*.md"
   authors:
     - dependabot[bot]
+    - renovate[bot]
 
-# Team conventions (fed into the prompt)
+# Team conventions (optional)
 instructions:
   - "We use file-scoped namespaces in C#"
   - "Always use async/await instead of .then()"
   - "Controllers should only call services, never repositories directly"
 
-# Defined patterns for consistency checks
+# Defined patterns for consistency checks (optional)
 patterns:
   - category: naming
     pattern: "Use PascalCase for classes, camelCase for variables"
   - category: architecture
     pattern: "Feature-based folder organization"
 
-# Output configuration
+# Output configuration (optional)
 output:
   summary: true
   inline_comments: true
@@ -155,12 +198,36 @@ output:
     effort_prefix: "effort:"
 ```
 
-## CLAUDE.md Integration
+## AI Context Files (Provider-Agnostic)
 
-Code Sentinel automatically reads your `CLAUDE.md` file to understand team conventions:
+Code Sentinel automatically searches for AI convention files to understand your team's patterns. It's **not tied to any specific LLM provider** - the same context files work with OpenAI, Anthropic, Gemini, or Ollama.
+
+### Supported Files (searched in order)
+
+| File | Description |
+|------|-------------|
+| `CLAUDE.md` | Claude Code conventions |
+| `AGENTS.md` | General AI agent instructions |
+| `COPILOT.md` | GitHub Copilot instructions |
+| `AI.md` | Generic AI conventions |
+| `CONVENTIONS.md` | Team coding conventions |
+| `.cursorrules` | Cursor editor rules |
+| `cursor.md` | Cursor conventions |
+| `.github/copilot-instructions.md` | GitHub Copilot config |
+
+### Search Locations
+
+Files are searched in these directories:
+- Repository root
+- `.claude/`
+- `.cursor/`
+- `.github/`
+- `docs/`
+
+### Example Context File
 
 ```markdown
-# CLAUDE.md
+# CONVENTIONS.md (or CLAUDE.md, AGENTS.md, etc.)
 
 ## Coding Conventions
 - Use file-scoped namespaces
@@ -170,6 +237,18 @@ Code Sentinel automatically reads your `CLAUDE.md` file to understand team conve
 ## Architecture
 - Feature-based folder organization
 - Repository pattern for data access
+```
+
+### Custom Configuration
+
+```yaml
+# .sentinel.yml
+context_files:
+  enabled: true
+  search_defaults: true  # Search for default files listed above
+  paths:                 # Additional custom paths
+    - "team/CONVENTIONS.md"
+    - ".ai/instructions.md"
 ```
 
 ## Action Inputs

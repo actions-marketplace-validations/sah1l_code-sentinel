@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ContextFile } from '../config/loader.js';
 import type { SentinelConfig } from '../config/schema.js';
 import type { ChangedFile, PlatformAdapter, PullRequest } from '../platforms/types.js';
 import { ContextCollector } from './context.js';
@@ -37,6 +38,7 @@ const createMockConfig = (overrides: Partial<SentinelConfig> = {}): SentinelConf
       effort_prefix: 'effort:',
     },
   },
+  context_files: { enabled: true, search_defaults: true },
   claude_md: { enabled: true },
   ...overrides,
 });
@@ -183,7 +185,12 @@ describe('ContextCollector', () => {
         instructions: ['Use TypeScript', 'Follow SOLID'],
         patterns: [{ category: 'naming', pattern: 'Use camelCase' }],
       });
-      collector = new ContextCollector(mockPlatform, config, 'CLAUDE.md content');
+
+      const contextFiles: ContextFile[] = [
+        { path: '/repo/CLAUDE.md', name: 'CLAUDE.md', content: 'CLAUDE.md content' },
+      ];
+
+      collector = new ContextCollector(mockPlatform, config, contextFiles);
 
       const pr = createMockPR([
         { filename: 'src/index.ts', status: 'modified', additions: 10, deletions: 5 },
@@ -194,7 +201,9 @@ describe('ContextCollector', () => {
 
       const context = await collector.collect(pr);
 
-      expect(context.reviewContext.conventions).toBe('CLAUDE.md content');
+      expect(context.reviewContext.contextFiles).toHaveLength(1);
+      expect(context.reviewContext.contextFiles[0].name).toBe('CLAUDE.md');
+      expect(context.reviewContext.contextFiles[0].content).toBe('CLAUDE.md content');
       expect(context.reviewContext.instructions).toEqual(['Use TypeScript', 'Follow SOLID']);
       expect(context.reviewContext.patterns).toHaveLength(1);
       expect(context.reviewContext.patterns[0].pattern).toBe('Use camelCase');

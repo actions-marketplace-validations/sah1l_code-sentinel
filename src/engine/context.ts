@@ -1,8 +1,9 @@
 import * as path from 'node:path';
 import * as core from '@actions/core';
 import { minimatch } from 'minimatch';
+import type { ContextFile } from '../config/loader.js';
 import type { SentinelConfig } from '../config/schema.js';
-import type { FileContext, ReviewContext } from '../llm/types.js';
+import type { AIContextFile, FileContext, ReviewContext } from '../llm/types.js';
 import type { ChangedFile, PlatformAdapter, PullRequest } from '../platforms/types.js';
 
 export interface CollectedContext {
@@ -13,11 +14,19 @@ export interface CollectedContext {
 }
 
 export class ContextCollector {
+  private aiContextFiles: AIContextFile[];
+
   constructor(
     private platform: PlatformAdapter,
     private config: SentinelConfig,
-    private claudeMdContent?: string
-  ) {}
+    contextFiles: ContextFile[] = []
+  ) {
+    // Convert loaded context files to AI context format
+    this.aiContextFiles = contextFiles.map((f) => ({
+      name: f.name,
+      content: f.content,
+    }));
+  }
 
   async collect(pr: PullRequest): Promise<CollectedContext> {
     core.info('Collecting context for review...');
@@ -35,9 +44,11 @@ export class ContextCollector {
     // Build diff from patches
     const diff = this.buildDiff(relevantFiles);
 
-    // Build review context
+    // Build review context with all AI context files
     const reviewContext: ReviewContext = {
-      conventions: this.claudeMdContent,
+      contextFiles: this.aiContextFiles,
+      // For backwards compatibility, use first context file as conventions
+      conventions: this.aiContextFiles[0]?.content,
       instructions: this.config.instructions,
       patterns: this.config.patterns,
     };

@@ -6,7 +6,15 @@ export interface FileContext {
   role: 'changed' | 'sibling' | 'import' | 'test';
 }
 
+export interface AIContextFile {
+  name: string;
+  content: string;
+}
+
 export interface ReviewContext {
+  // All loaded AI context files (CLAUDE.md, AGENTS.md, etc.)
+  contextFiles: AIContextFile[];
+  // Deprecated: kept for backwards compatibility
   conventions?: string;
   instructions: string[];
   patterns: Pattern[];

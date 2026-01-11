@@ -57,6 +57,27 @@ export const LLMConfigSchema = z.object({
   base_url: z.string().optional(),
 });
 
+// Default AI context files to search for (provider-agnostic)
+export const DEFAULT_CONTEXT_FILES = [
+  'CLAUDE.md',
+  'AGENTS.md',
+  'COPILOT.md',
+  'AI.md',
+  'CONVENTIONS.md',
+  '.cursorrules',
+  'cursor.md',
+  '.github/copilot-instructions.md',
+];
+
+export const ContextFilesConfigSchema = z.object({
+  enabled: z.boolean().default(true),
+  // Custom paths to search for AI context files
+  paths: z.array(z.string()).optional(),
+  // If true, search for all default files; if false, only use custom paths
+  search_defaults: z.boolean().default(true),
+});
+
+// Keep backwards compatibility with claude_md config
 export const ClaudeMdConfigSchema = z.object({
   enabled: z.boolean().default(true),
   path: z.string().optional(),
@@ -69,6 +90,9 @@ export const SentinelConfigSchema = z.object({
   instructions: z.array(z.string()).default([]),
   patterns: z.array(PatternSchema).default([]),
   output: OutputConfigSchema.default({}),
+  // New provider-agnostic context files config
+  context_files: ContextFilesConfigSchema.default({}),
+  // Deprecated: kept for backwards compatibility
   claude_md: ClaudeMdConfigSchema.default({}),
 });
 

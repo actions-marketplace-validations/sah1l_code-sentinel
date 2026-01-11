@@ -55,6 +55,7 @@ describe('buildReviewPrompt', () => {
     ],
     relatedFiles: [],
     context: {
+      contextFiles: [],
       instructions: [],
       patterns: [],
     },
@@ -98,7 +99,9 @@ describe('buildReviewPrompt', () => {
   it('should include conventions from CLAUDE.md', () => {
     const request = createMockRequest({
       context: {
-        conventions: '# Team Conventions\n- Use TypeScript strict mode',
+        contextFiles: [
+          { name: 'CLAUDE.md', content: '# Team Conventions\n- Use TypeScript strict mode' },
+        ],
         instructions: [],
         patterns: [],
       },
@@ -112,6 +115,7 @@ describe('buildReviewPrompt', () => {
   it('should include custom instructions', () => {
     const request = createMockRequest({
       context: {
+        contextFiles: [],
         instructions: ['Always use async/await', 'Prefer const over let'],
         patterns: [],
       },
@@ -126,6 +130,7 @@ describe('buildReviewPrompt', () => {
   it('should include team patterns', () => {
     const request = createMockRequest({
       context: {
+        contextFiles: [],
         instructions: [],
         patterns: [
           { category: 'naming', pattern: 'Use camelCase for variables' },

@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import type { ContextFile } from '../config/loader.js';
 import type { SentinelConfig } from '../config/schema.js';
 import type { LLMProvider, ReviewIssue, ReviewRequest, ReviewResponse } from '../llm/types.js';
 import type { PlatformAdapter, PullRequest } from '../platforms/types.js';
@@ -18,9 +19,9 @@ export class ReviewAnalyzer {
     platform: PlatformAdapter,
     private llmProvider: LLMProvider,
     private config: SentinelConfig,
-    claudeMdContent?: string
+    contextFiles: ContextFile[] = []
   ) {
-    this.contextCollector = new ContextCollector(platform, config, claudeMdContent);
+    this.contextCollector = new ContextCollector(platform, config, contextFiles);
   }
 
   async analyze(pr: PullRequest): Promise<AnalysisResult> {

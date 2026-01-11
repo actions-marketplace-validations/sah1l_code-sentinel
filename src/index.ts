@@ -18,10 +18,13 @@ async function run(): Promise<void> {
 
     // Load configuration
     core.info('Loading configuration...');
-    const { config: baseConfig, claudeMdContent } = await loadConfig(configPath, workingDir);
+    const { config: baseConfig, contextFiles } = await loadConfig(configPath, workingDir);
     const config = mergeWithActionInputs(baseConfig);
 
     core.info(`LLM Provider: ${config.llm.provider}`);
+    if (contextFiles.length > 0) {
+      core.info(`AI context files: ${contextFiles.map((f) => f.name).join(', ')}`);
+    }
     core.info(`Review categories: ${config.review.categories.join(', ')}`);
 
     // Initialize platform adapter
@@ -37,7 +40,7 @@ async function run(): Promise<void> {
     const llmProvider = createLLMProvider(config);
 
     // Analyze the PR
-    const analyzer = new ReviewAnalyzer(platform, llmProvider, config, claudeMdContent);
+    const analyzer = new ReviewAnalyzer(platform, llmProvider, config, contextFiles);
     const result = await analyzer.analyze(pr);
 
     if (result.skipped) {

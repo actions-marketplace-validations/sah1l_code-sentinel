@@ -54,20 +54,26 @@ export function buildReviewPrompt(request: ReviewRequest): string {
 ${request.pr.body ? `**Description:**\n${request.pr.body}` : ''}`);
 
   // Codebase Context
-  if (request.context.conventions || request.context.instructions.length > 0) {
+  const hasContextFiles = request.context.contextFiles && request.context.contextFiles.length > 0;
+  const hasInstructions = request.context.instructions.length > 0;
+
+  if (hasContextFiles || hasInstructions) {
     sections.push('## Codebase Context');
 
     if (request.context.stack) {
       sections.push(`**Technology Stack:** ${request.context.stack.frameworks.join(', ')}`);
     }
 
-    if (request.context.conventions) {
-      sections.push(
-        `### Team Conventions (from CLAUDE.md)\n${truncate(request.context.conventions, 2000)}`
-      );
+    // Include all AI context files (CLAUDE.md, AGENTS.md, etc.)
+    if (hasContextFiles) {
+      for (const ctxFile of request.context.contextFiles) {
+        sections.push(
+          `### Team Conventions (from ${ctxFile.name})\n${truncate(ctxFile.content, 2000)}`
+        );
+      }
     }
 
-    if (request.context.instructions.length > 0) {
+    if (hasInstructions) {
       sections.push(
         `### Custom Instructions\n${request.context.instructions.map((i) => `- ${i}`).join('\n')}`
       );
