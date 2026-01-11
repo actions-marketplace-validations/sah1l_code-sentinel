@@ -1,5 +1,4 @@
-
-import type { ReviewRequest, FileContext } from '../llm/types.js';
+import type { FileContext, ReviewRequest } from '../llm/types.js';
 
 export function getSystemPrompt(): string {
   return `You are Code Sentinel, an expert AI code reviewer. Your role is to analyze pull request changes and provide actionable, high-quality feedback focused on:
@@ -63,19 +62,21 @@ ${request.pr.body ? `**Description:**\n${request.pr.body}` : ''}`);
     }
 
     if (request.context.conventions) {
-      sections.push(`### Team Conventions (from CLAUDE.md)\n${truncate(request.context.conventions, 2000)}`);
+      sections.push(
+        `### Team Conventions (from CLAUDE.md)\n${truncate(request.context.conventions, 2000)}`
+      );
     }
 
     if (request.context.instructions.length > 0) {
-      sections.push(`### Custom Instructions\n${request.context.instructions.map((i) => `- ${i}`).join('\n')}`);
+      sections.push(
+        `### Custom Instructions\n${request.context.instructions.map((i) => `- ${i}`).join('\n')}`
+      );
     }
   }
 
   // Team Patterns
   if (request.context.patterns.length > 0) {
-    const patternLines = request.context.patterns.map(
-      (p) => `- **${p.category}**: ${p.pattern}`
-    );
+    const patternLines = request.context.patterns.map((p) => `- **${p.category}**: ${p.pattern}`);
     sections.push(`### Team Patterns\n${patternLines.join('\n')}`);
   }
 

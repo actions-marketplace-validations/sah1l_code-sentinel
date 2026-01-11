@@ -1,6 +1,5 @@
-
 import type { SentinelConfig } from '../config/schema.js';
-import type { ReviewResponse, ReviewIssue } from '../llm/types.js';
+import type { ReviewIssue, ReviewResponse } from '../llm/types.js';
 import type { ReviewComment } from '../platforms/types.js';
 
 export interface FormattedOutput {
@@ -13,7 +12,7 @@ export class OutputFormatter {
   constructor(
     private config: SentinelConfig,
     private llmProviderName: string
-  ) { }
+  ) {}
 
   format(response: ReviewResponse, filteredIssues: ReviewIssue[]): FormattedOutput {
     const summary = this.formatSummary(response, filteredIssues);
@@ -108,12 +107,14 @@ export class OutputFormatter {
     const issuesWithLines = issues.filter((i) => i.line !== undefined);
 
     for (const issue of issuesWithLines.slice(0, maxComments)) {
-      comments.push({
-        path: issue.file,
-        line: issue.line!,
-        body: this.formatInlineComment(issue),
-        side: 'RIGHT',
-      });
+      if (issue.line !== undefined) {
+        comments.push({
+          path: issue.file,
+          line: issue.line,
+          body: this.formatInlineComment(issue),
+          side: 'RIGHT',
+        });
+      }
     }
 
     return comments;

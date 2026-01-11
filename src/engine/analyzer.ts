@@ -1,8 +1,7 @@
-
 import * as core from '@actions/core';
 import type { SentinelConfig } from '../config/schema.js';
+import type { LLMProvider, ReviewIssue, ReviewRequest, ReviewResponse } from '../llm/types.js';
 import type { PlatformAdapter, PullRequest } from '../platforms/types.js';
-import type { LLMProvider, ReviewRequest, ReviewResponse, ReviewIssue } from '../llm/types.js';
 import { ContextCollector } from './context.js';
 
 export interface AnalysisResult {

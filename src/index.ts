@@ -1,10 +1,9 @@
-
 import * as core from '@actions/core';
 import { loadConfig, mergeWithActionInputs } from './config/index.js';
-import { GitHubAdapter } from './platforms/index.js';
-import { createLLMProvider } from './llm/index.js';
 import { ReviewAnalyzer } from './engine/index.js';
+import { createLLMProvider } from './llm/index.js';
 import { OutputFormatter } from './output/index.js';
+import { GitHubAdapter } from './platforms/index.js';
 
 async function run(): Promise<void> {
   try {

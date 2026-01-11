@@ -1,11 +1,10 @@
-
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  SentinelConfigSchema,
-  defaultConfig,
-  ReviewCategorySchema,
-  SeveritySchema,
   LLMProviderSchema,
+  ReviewCategorySchema,
+  SentinelConfigSchema,
+  SeveritySchema,
+  defaultConfig,
 } from './schema.js';
 
 describe('SentinelConfigSchema', () => {
@@ -137,9 +136,10 @@ describe('LLMProviderSchema', () => {
     expect(LLMProviderSchema.parse('openai')).toBe('openai');
     expect(LLMProviderSchema.parse('ollama')).toBe('ollama');
     expect(LLMProviderSchema.parse('anthropic')).toBe('anthropic');
+    expect(LLMProviderSchema.parse('gemini')).toBe('gemini');
   });
 
   it('should reject invalid providers', () => {
-    expect(() => LLMProviderSchema.parse('gemini')).toThrow();
+    expect(() => LLMProviderSchema.parse('unknown-provider')).toThrow();
   });
 });

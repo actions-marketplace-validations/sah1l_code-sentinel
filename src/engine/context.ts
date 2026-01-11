@@ -1,10 +1,9 @@
-
 import * as path from 'node:path';
 import * as core from '@actions/core';
 import { minimatch } from 'minimatch';
 import type { SentinelConfig } from '../config/schema.js';
-import type { PlatformAdapter, PullRequest, ChangedFile } from '../platforms/types.js';
 import type { FileContext, ReviewContext } from '../llm/types.js';
+import type { ChangedFile, PlatformAdapter, PullRequest } from '../platforms/types.js';
 
 export interface CollectedContext {
   changedFiles: FileContext[];
@@ -18,7 +17,7 @@ export class ContextCollector {
     private platform: PlatformAdapter,
     private config: SentinelConfig,
     private claudeMdContent?: string
-  ) { }
+  ) {}
 
   async collect(pr: PullRequest): Promise<CollectedContext> {
     core.info('Collecting context for review...');
@@ -109,10 +108,7 @@ export class ContextCollector {
     return results.slice(0, 5);
   }
 
-  private async findSiblingFiles(
-    filePath: string,
-    exclude: Set<string>
-  ): Promise<FileContext[]> {
+  private async findSiblingFiles(filePath: string, exclude: Set<string>): Promise<FileContext[]> {
     const dir = path.dirname(filePath);
     const ext = path.extname(filePath);
     const results: FileContext[] = [];

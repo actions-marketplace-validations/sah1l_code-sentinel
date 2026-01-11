@@ -1,8 +1,7 @@
-
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ContextCollector } from './context.js';
-import type { PlatformAdapter, PullRequest, ChangedFile } from '../platforms/types.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SentinelConfig } from '../config/schema.js';
+import type { ChangedFile, PlatformAdapter, PullRequest } from '../platforms/types.js';
+import { ContextCollector } from './context.js';
 
 // Mock platform adapter
 const createMockPlatform = (): PlatformAdapter => ({

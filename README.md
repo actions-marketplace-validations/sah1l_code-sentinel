@@ -10,7 +10,7 @@ AI-powered code review GitHub Action that learns your team's patterns and focuse
 
 ## Features
 
-- **Multiple LLM Providers**: OpenAI GPT-4o or self-hosted Ollama (CodeLlama, DeepSeek, etc.)
+- **Multiple LLM Providers**: OpenAI GPT-4o, Anthropic Claude, Google Gemini, or self-hosted Ollama
 - **Context-Aware Reviews**: Understands your codebase patterns from CLAUDE.md and .sentinel.yml
 - **Focused Feedback**: Security, architecture, performance, and bug detection
 - **Pattern Learning**: Define team conventions and get consistent reviews
@@ -46,6 +46,38 @@ jobs:
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
 ```
 
+### Using Anthropic Claude
+
+```yaml
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: AI Code Review
+        uses: sah1l/code-sentinel@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+```
+
+### Using Google Gemini
+
+```yaml
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: AI Code Review
+        uses: sah1l/code-sentinel@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+```
+
 ### Using Ollama (Self-hosted)
 
 ```yaml
@@ -77,7 +109,7 @@ Create a `.sentinel.yml` file in your repository root:
 ```yaml
 # LLM Configuration
 llm:
-  provider: openai  # openai | ollama
+  provider: openai  # openai | anthropic | gemini | ollama
   model: gpt-4o
 
 # Review Focus Areas
@@ -147,6 +179,10 @@ Code Sentinel automatically reads your `CLAUDE.md` file to understand team conve
 | `github_token` | GitHub token for API access | Yes | - |
 | `openai_api_key` | OpenAI API key | No | - |
 | `openai_model` | OpenAI model to use | No | `gpt-4o` |
+| `anthropic_api_key` | Anthropic API key | No | - |
+| `anthropic_model` | Anthropic model to use | No | `claude-sonnet-4-20250514` |
+| `gemini_api_key` | Google Gemini API key | No | - |
+| `gemini_model` | Gemini model to use | No | `gemini-2.0-flash` |
 | `ollama_base_url` | Ollama server URL | No | `http://localhost:11434` |
 | `ollama_model` | Ollama model to use | No | `codellama:13b` |
 | `config_path` | Path to .sentinel.yml | No | `.sentinel.yml` |

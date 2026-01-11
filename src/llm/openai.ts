@@ -1,8 +1,7 @@
-
 import * as core from '@actions/core';
 import OpenAI from 'openai';
-import type { LLMProvider, ReviewRequest, ReviewResponse } from './types.js';
 import { buildReviewPrompt, getSystemPrompt } from '../prompts/review.js';
+import type { LLMProvider, ReviewRequest, ReviewResponse } from './types.js';
 
 export class OpenAIProvider implements LLMProvider {
   readonly name = 'openai';

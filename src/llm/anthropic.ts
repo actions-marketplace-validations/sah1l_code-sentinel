@@ -1,15 +1,16 @@
+// Created by Claude AI Agent
 import * as core from '@actions/core';
-import { Ollama } from 'ollama';
+import Anthropic from '@anthropic-ai/sdk';
 import { buildReviewPrompt, getSystemPrompt } from '../prompts/review.js';
 import type { LLMProvider, ReviewRequest, ReviewResponse } from './types.js';
 
-export class OllamaProvider implements LLMProvider {
-  readonly name = 'ollama';
-  private client: Ollama;
+export class AnthropicProvider implements LLMProvider {
+  readonly name = 'anthropic';
+  private client: Anthropic;
   private model: string;
 
-  constructor(baseUrl = 'http://localhost:11434', model = 'codellama:13b') {
-    this.client = new Ollama({ host: baseUrl });
+  constructor(apiKey: string, model = 'claude-sonnet-4-20250514') {
+    this.client = new Anthropic({ apiKey });
     this.model = model;
   }
 
@@ -17,43 +18,36 @@ export class OllamaProvider implements LLMProvider {
     const systemPrompt = getSystemPrompt();
     const userPrompt = buildReviewPrompt(request);
 
-    core.info(`Sending review request to Ollama (${this.model})...`);
+    core.info(`Sending review request to Anthropic (${this.model})...`);
     core.debug(`Prompt length: ${userPrompt.length} characters`);
 
     try {
-      const response = await this.client.chat({
+      const response = await this.client.messages.create({
         model: this.model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        format: 'json',
-        options: {
-          temperature: 0.1,
-          num_predict: 4096,
-        },
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
       });
 
-      const content = response.message?.content;
+      const content = response.content[0];
 
-      if (!content) {
-        throw new Error('Empty response from Ollama');
+      if (!content || content.type !== 'text') {
+        throw new Error('Empty response from Anthropic');
       }
 
-      core.debug(`Ollama response: ${content.substring(0, 500)}...`);
+      core.debug(`Anthropic response: ${content.text.substring(0, 500)}...`);
 
-      const parsed = JSON.parse(content) as ReviewResponse;
+      // Extract JSON from response (may be wrapped in markdown code blocks)
+      const jsonMatch = content.text.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, content.text];
+      const jsonString = jsonMatch[1]?.trim() || content.text.trim();
+
+      const parsed = JSON.parse(jsonString) as ReviewResponse;
 
       return this.validateResponse(parsed);
     } catch (error) {
-      if (error instanceof Error) {
-        core.error(`Ollama error: ${error.message}`);
-
-        if (error.message.includes('ECONNREFUSED')) {
-          throw new Error(
-            'Cannot connect to Ollama. Make sure Ollama is running at the configured URL.'
-          );
-        }
+      if (error instanceof Anthropic.APIError) {
+        core.error(`Anthropic API error: ${error.message}`);
+        throw new Error(`Anthropic API error: ${error.message}`);
       }
       throw error;
     }

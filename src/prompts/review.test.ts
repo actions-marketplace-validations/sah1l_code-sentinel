@@ -1,7 +1,6 @@
-
-import { describe, it, expect } from 'vitest';
-import { getSystemPrompt, buildReviewPrompt } from './review.js';
+import { describe, expect, it } from 'vitest';
 import type { ReviewRequest } from '../llm/types.js';
+import { buildReviewPrompt, getSystemPrompt } from './review.js';
 
 describe('getSystemPrompt', () => {
   it('should return a non-empty system prompt', () => {

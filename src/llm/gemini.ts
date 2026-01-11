@@ -1,15 +1,16 @@
+// Created by Claude AI Agent
 import * as core from '@actions/core';
-import { Ollama } from 'ollama';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { buildReviewPrompt, getSystemPrompt } from '../prompts/review.js';
 import type { LLMProvider, ReviewRequest, ReviewResponse } from './types.js';
 
-export class OllamaProvider implements LLMProvider {
-  readonly name = 'ollama';
-  private client: Ollama;
+export class GeminiProvider implements LLMProvider {
+  readonly name = 'gemini';
+  private client: GoogleGenerativeAI;
   private model: string;
 
-  constructor(baseUrl = 'http://localhost:11434', model = 'codellama:13b') {
-    this.client = new Ollama({ host: baseUrl });
+  constructor(apiKey: string, model = 'gemini-2.0-flash') {
+    this.client = new GoogleGenerativeAI(apiKey);
     this.model = model;
   }
 
@@ -17,43 +18,41 @@ export class OllamaProvider implements LLMProvider {
     const systemPrompt = getSystemPrompt();
     const userPrompt = buildReviewPrompt(request);
 
-    core.info(`Sending review request to Ollama (${this.model})...`);
+    core.info(`Sending review request to Gemini (${this.model})...`);
     core.debug(`Prompt length: ${userPrompt.length} characters`);
 
     try {
-      const response = await this.client.chat({
+      const generativeModel = this.client.getGenerativeModel({
         model: this.model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        format: 'json',
-        options: {
+        systemInstruction: systemPrompt,
+        generationConfig: {
           temperature: 0.1,
-          num_predict: 4096,
+          maxOutputTokens: 4096,
+          responseMimeType: 'application/json',
         },
       });
 
-      const content = response.message?.content;
+      const result = await generativeModel.generateContent(userPrompt);
+      const response = result.response;
+      const content = response.text();
 
       if (!content) {
-        throw new Error('Empty response from Ollama');
+        throw new Error('Empty response from Gemini');
       }
 
-      core.debug(`Ollama response: ${content.substring(0, 500)}...`);
+      core.debug(`Gemini response: ${content.substring(0, 500)}...`);
 
-      const parsed = JSON.parse(content) as ReviewResponse;
+      // Extract JSON from response (may be wrapped in markdown code blocks)
+      const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, content];
+      const jsonString = jsonMatch[1]?.trim() || content.trim();
+
+      const parsed = JSON.parse(jsonString) as ReviewResponse;
 
       return this.validateResponse(parsed);
     } catch (error) {
       if (error instanceof Error) {
-        core.error(`Ollama error: ${error.message}`);
-
-        if (error.message.includes('ECONNREFUSED')) {
-          throw new Error(
-            'Cannot connect to Ollama. Make sure Ollama is running at the configured URL.'
-          );
-        }
+        core.error(`Gemini API error: ${error.message}`);
+        throw new Error(`Gemini API error: ${error.message}`);
       }
       throw error;
     }

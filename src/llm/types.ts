@@ -1,5 +1,4 @@
-
-import type { ReviewCategory, Severity, Pattern } from '../config/schema.js';
+import type { Pattern, ReviewCategory, Severity } from '../config/schema.js';
 
 export interface FileContext {
   path: string;

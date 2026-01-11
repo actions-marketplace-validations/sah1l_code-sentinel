@@ -1,8 +1,7 @@
-
-import { describe, it, expect } from 'vitest';
-import { OutputFormatter } from './formatter.js';
+import { describe, expect, it } from 'vitest';
 import type { SentinelConfig } from '../config/schema.js';
-import type { ReviewResponse, ReviewIssue } from '../llm/types.js';
+import type { ReviewIssue, ReviewResponse } from '../llm/types.js';
+import { OutputFormatter } from './formatter.js';
 
 const createMockConfig = (overrides: Partial<SentinelConfig> = {}): SentinelConfig => ({
   llm: { provider: 'openai' },

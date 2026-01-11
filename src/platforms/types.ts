@@ -1,5 +1,3 @@
-
-
 export type FileStatus = 'added' | 'modified' | 'deleted' | 'renamed' | 'copied' | 'changed';
 
 export interface ChangedFile {

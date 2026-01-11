@@ -1,4 +1,3 @@
-
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as core from '@actions/core';
@@ -89,7 +88,8 @@ export function mergeWithActionInputs(config: SentinelConfig): SentinelConfig {
     llm: {
       ...config.llm,
       provider,
-      model: provider === 'openai' ? (openaiModel || config.llm.model) : (ollamaModel || config.llm.model),
+      model:
+        provider === 'openai' ? openaiModel || config.llm.model : ollamaModel || config.llm.model,
       base_url: ollamaBaseUrl || config.llm.base_url,
     },
   };

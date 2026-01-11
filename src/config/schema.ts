@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 export const ReviewCategorySchema = z.enum([
@@ -15,7 +14,7 @@ export const SeveritySchema = z.enum(['critical', 'warning', 'suggestion', 'nitp
 
 export type Severity = z.infer<typeof SeveritySchema>;
 
-export const LLMProviderSchema = z.enum(['openai', 'ollama', 'anthropic']);
+export const LLMProviderSchema = z.enum(['openai', 'ollama', 'anthropic', 'gemini']);
 
 export type LLMProvider = z.infer<typeof LLMProviderSchema>;
 
