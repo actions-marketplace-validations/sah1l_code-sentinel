@@ -12,6 +12,10 @@ llm:
 
 # Review Focus Areas (optional)
 review:
+  # Review mode: 'quick' (single API call) or 'deep' (agentic with tools)
+  # - quick: Cost-effective ~1 API call. Good for simple PRs.
+  # - deep: More thorough, uses tools to explore codebase. ~3-10 API calls.
+  mode: quick
   categories:
     - security      # OWASP top 10, secrets, injection
     - architecture  # SOLID, patterns, coupling

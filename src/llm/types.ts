@@ -1,4 +1,5 @@
-import type { Pattern, ReviewCategory, Severity } from '../config/schema.js';
+import type { Pattern, ReviewCategory, ReviewMode, Severity } from '../config/schema.js';
+import type { ToolExecutor } from '../tools/executor.js';
 
 export interface FileContext {
   path: string;
@@ -37,6 +38,8 @@ export interface ReviewRequest {
   relatedFiles: FileContext[];
   context: ReviewContext;
   categories: ReviewCategory[];
+  /** Review mode: 'quick' for single call, 'deep' for agentic with tools */
+  reviewMode: ReviewMode;
 }
 
 export interface ReviewIssue {
@@ -59,6 +62,8 @@ export interface ReviewResponse {
 
 export interface LLMProvider {
   readonly name: string;
+  /** Set the tool executor for deep review mode */
+  setToolExecutor?(executor: ToolExecutor): void;
   analyze(request: ReviewRequest): Promise<ReviewResponse>;
 }
 

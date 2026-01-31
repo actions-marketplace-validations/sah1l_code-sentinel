@@ -14,10 +14,15 @@ export class OllamaProvider implements LLMProvider {
   }
 
   async analyze(request: ReviewRequest): Promise<ReviewResponse> {
+    // Ollama has limited tool support - always use quick mode with a warning
+    if (request.reviewMode === 'deep') {
+      core.warning('Ollama has limited tool support. Falling back to quick mode.');
+    }
+
     const systemPrompt = getSystemPrompt();
     const userPrompt = buildReviewPrompt(request);
 
-    core.info(`Sending review request to Ollama (${this.model})...`);
+    core.info(`Sending review request to Ollama (${this.model}) - quick mode...`);
     core.debug(`Prompt length: ${userPrompt.length} characters`);
 
     try {

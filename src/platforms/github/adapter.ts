@@ -4,7 +4,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { minimatch } from 'minimatch';
 import type { ChangedFile, PlatformAdapter, PullRequest, ReviewComment } from '../types.js';
-import { parsePatch, findNearestValidLine, type ParsedDiff } from './diff-parser.js';
+import { type ParsedDiff, findNearestValidLine, parsePatch } from './diff-parser.js';
 
 type Octokit = ReturnType<typeof github.getOctokit>;
 
@@ -189,9 +189,7 @@ export class GitHubAdapter implements PlatformAdapter {
       const validLine = findNearestValidLine(comment.line, parsedDiff, 3);
 
       if (validLine === undefined) {
-        core.debug(
-          `Skipping comment on ${comment.path}:${comment.line} - line not in diff`
-        );
+        core.debug(`Skipping comment on ${comment.path}:${comment.line} - line not in diff`);
         skippedCount++;
         continue;
       }
@@ -211,9 +209,7 @@ export class GitHubAdapter implements PlatformAdapter {
     }
 
     if (skippedCount > 0) {
-      core.warning(
-        `Skipped ${skippedCount} comment(s) - line numbers not in PR diff`
-      );
+      core.warning(`Skipped ${skippedCount} comment(s) - line numbers not in PR diff`);
     }
 
     if (validComments.length === 0) {

@@ -12,6 +12,7 @@ AI-powered code review GitHub Action that learns your team's patterns and focuse
 ## Features
 
 - **Multiple LLM Providers**: OpenAI GPT-4o, Anthropic Claude, Google Gemini, or self-hosted Ollama
+- **Two Review Modes**: Quick (cost-effective) or Deep (agentic with tool-use for better context)
 - **Context-Aware Reviews**: Understands your codebase patterns from CLAUDE.md and .sentinel.yml
 - **Focused Feedback**: Security, architecture, performance, and bug detection
 - **Pattern Learning**: Define team conventions and get consistent reviews
@@ -266,7 +267,47 @@ context_files:
 | `ollama_base_url` | Ollama server URL | No | `http://localhost:11434` |
 | `ollama_model` | Ollama model to use | No | `codellama:13b` |
 | `config_path` | Path to .sentinel.yml | No | `.sentinel.yml` |
+| `review_mode` | Review mode: `quick` or `deep` | No | `quick` |
 | `dry_run` | Don't post comments | No | `false` |
+
+## Review Modes
+
+Code Sentinel offers two review modes to balance thoroughness vs. cost:
+
+| Mode | API Calls | Context Gathering | Best For |
+|------|-----------|-------------------|----------|
+| `quick` | ~1 | Changed files + diff only | Simple PRs, cost-conscious teams |
+| `deep` | ~3-10 | AI explores codebase with tools | Complex PRs, refactors, new features |
+
+### Quick Mode (Default)
+
+Single API call with the PR diff and changed file contents. Fast and cost-effective.
+
+```yaml
+- uses: sah1l/code-sentinel@v1
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+    review_mode: quick  # Default
+```
+
+### Deep Mode
+
+The AI uses tools to explore your codebase during review:
+- **read_file**: Read imports, type definitions, related code
+- **list_files**: Explore project structure
+- **search_code**: Find function definitions and usages
+- **get_structure**: Understand overall architecture
+
+```yaml
+- uses: sah1l/code-sentinel@v1
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+    review_mode: deep  # More thorough, higher cost
+```
+
+> **Note:** Ollama has limited tool support and will fall back to quick mode with a warning.
 
 ## Action Outputs
 

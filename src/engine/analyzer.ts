@@ -59,6 +59,7 @@ export class ReviewAnalyzer {
       relatedFiles: context.relatedFiles,
       context: context.reviewContext,
       categories: this.config.review.categories,
+      reviewMode: this.config.review.mode,
     };
 
     // Get LLM analysis

@@ -4,6 +4,7 @@ import { ReviewAnalyzer } from './engine/index.js';
 import { createLLMProvider } from './llm/index.js';
 import { OutputFormatter } from './output/index.js';
 import { GitHubAdapter } from './platforms/index.js';
+import { ToolExecutor } from './tools/executor.js';
 
 async function run(): Promise<void> {
   try {
@@ -22,6 +23,7 @@ async function run(): Promise<void> {
     const config = mergeWithActionInputs(baseConfig);
 
     core.info(`LLM Provider: ${config.llm.provider}`);
+    core.info(`Review Mode: ${config.review.mode}`);
     if (contextFiles.length > 0) {
       core.info(`AI context files: ${contextFiles.map((f) => f.name).join(', ')}`);
     }
@@ -38,6 +40,13 @@ async function run(): Promise<void> {
 
     // Initialize LLM provider
     const llmProvider = createLLMProvider(config);
+
+    // Set up tool executor for deep mode
+    if (config.review.mode === 'deep' && llmProvider.setToolExecutor) {
+      const toolExecutor = new ToolExecutor(workingDir);
+      llmProvider.setToolExecutor(toolExecutor);
+      core.info('Deep review mode enabled - LLM will explore codebase with tools');
+    }
 
     // Analyze the PR
     const analyzer = new ReviewAnalyzer(platform, llmProvider, config, contextFiles);

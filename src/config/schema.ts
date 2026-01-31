@@ -45,10 +45,16 @@ export const IgnoreConfigSchema = z.object({
   authors: z.array(z.string()).default([]),
 });
 
+export const ReviewModeSchema = z.enum(['quick', 'deep']);
+
+export type ReviewMode = z.infer<typeof ReviewModeSchema>;
+
 export const ReviewConfigSchema = z.object({
   categories: z.array(ReviewCategorySchema).default(['security', 'architecture', 'bugs']),
   min_severity: SeveritySchema.default('suggestion'),
   skip_if_effort_below: z.number().min(1).max(5).default(1),
+  /** Review mode: 'quick' (single API call) or 'deep' (agentic with tool-use) */
+  mode: ReviewModeSchema.default('quick'),
 });
 
 export const LLMConfigSchema = z.object({

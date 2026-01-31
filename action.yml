@@ -54,6 +54,11 @@ inputs:
     required: false
     default: '.sentinel.yml'
 
+  review_mode:
+    description: 'Review mode: quick (single API call) or deep (agentic with tools for better context)'
+    required: false
+    default: 'quick'
+
   dry_run:
     description: 'If true, will not post comments (useful for testing)'
     required: false
